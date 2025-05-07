@@ -31,7 +31,7 @@ fun MapScreen(modifier: Modifier = Modifier) {
             }){
             Marker(
                 state = MarkerState(position = itb), title = "ITB",
-                snippet = "Marker at ITB")
+                snippet = "MarkerD at ITB")
         }
 
     }
