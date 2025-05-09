@@ -1,5 +1,7 @@
 package com.example.mapsapp.viewmodels
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.mapsapp.MyApp
@@ -21,8 +23,29 @@ class OperacionesVM : ViewModel() {
     val markerImage = _markerImage
     private var _selectedMarker: MarkerD? = null
 
+    private val _imageUri = MutableLiveData<Uri>(null)
+    val imageuri = _imageUri
+    private var _bitmap = MutableLiveData<Bitmap>(null)
+    val bitmap = _bitmap
 
-    fun updateStudent(id: Int, title: String, descripcion: String, image: String){
+    fun setImageUri(uri: Uri?){
+        _imageUri.value = uri
+
+    }
+
+    fun setBitmap(bit: Bitmap){
+        _bitmap.value = bit
+
+    }
+    fun editTitle(value: String) {
+        _markerTitle.value = value
+    }
+
+    fun editDesc(value: String) {
+        _markerDescrip.value = value
+    }
+
+    fun updateStudent(id: Int, title: String, descripcion: String, image: String) {
         CoroutineScope(Dispatchers.IO).launch {
             database.updateMarker(
                 id = id,
@@ -32,8 +55,9 @@ class OperacionesVM : ViewModel() {
             )
         }
     }
-    fun getMarker(id: Int){
-        if(_selectedMarker == null){
+
+    fun getMarker(id: Int) {
+        if (_selectedMarker == null) {
             CoroutineScope(Dispatchers.IO).launch {
                 val marker = database.getMarker(id)
                 withContext(Dispatchers.Main) {
@@ -47,11 +71,10 @@ class OperacionesVM : ViewModel() {
         }
     }
 
-    fun insertNewMarker(id: Int, title: String, descripcion: String, image: String) {
+    fun insertNewMarker(title: String, descripcion: String, image: String) {
         val newMarker = MarkerD(
-            id = id,
             title = title,
-            descripcion =descripcion,
+            descripcion = descripcion,
             image = image
         )
         CoroutineScope(Dispatchers.IO).launch {
@@ -60,10 +83,11 @@ class OperacionesVM : ViewModel() {
         }
     }
 
-    fun deleteMarker(id: Int){
+    fun deleteMarker(id: Int) {
         CoroutineScope(Dispatchers.IO).launch {
             database.deleteMarker(id)
-            database.getAllMarkers()        }
+            database.getAllMarkers()
+        }
     }
 
 }

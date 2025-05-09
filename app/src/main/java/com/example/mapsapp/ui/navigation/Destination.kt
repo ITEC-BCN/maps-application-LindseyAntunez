@@ -11,6 +11,12 @@ sealed class Destination {
     object List : Destination()
 
     @Serializable
+    data class CreateMarker (var lat: Double, var lon: Double)
+
+    @Serializable
+    object DetailMarker : Destination()
+
+    @Serializable
     object Permisos : Destination()
 
     @Serializable

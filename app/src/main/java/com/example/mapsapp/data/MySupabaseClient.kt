@@ -1,5 +1,6 @@
 package com.example.mapsapp.data
 
+import android.util.Log
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
@@ -18,11 +19,11 @@ class MySupabaseClient() {
     }
 
     suspend fun getAllMarkers(): List<MarkerD> {
-        return client.from("MarkerD").select().decodeList<MarkerD>()
+        return client.from("marcador").select().decodeList<MarkerD>()
     }
 
     suspend fun getMarker(id: Int): MarkerD {
-        return client.from("MarkerD").select {
+        return client.from("marcador").select {
             filter {
                 eq("id", id)
             }
@@ -30,11 +31,18 @@ class MySupabaseClient() {
     }
 
     suspend fun insertMarker(markerD: MarkerD) {
-        client.from("MarkerD").insert(markerD)
+        Log.d("Lindsey", "Entrar del InsertMarker")
+        Log.d("Lindsey","httpURL: ${client.supabaseHttpUrl}")
+        Log.d("Lindsey", "supabaseURL: ${client.supabaseUrl}")
+        Log.d("Lindsey", "key: ${client.supabaseKey}")
+
+        client.from("marcador").insert(markerD)
+
+        Log.d("Lindsey", "Salir del InsertMarker")
     }
 
     suspend fun updateMarker(id:Int, title: String, descripcion: String, image: String) {
-        client.from("MarkerD").update({
+        client.from("marcador").update({
             set("title", title)
             set("descripcion", descripcion)
             set("image", image)
@@ -42,7 +50,7 @@ class MySupabaseClient() {
     }
 
     suspend fun deleteMarker(id: Int) {
-        client.from("MarkerD").delete { filter { eq("id", id) } }
+        client.from("marcador").delete { filter { eq("id", id) } }
     }
 
 

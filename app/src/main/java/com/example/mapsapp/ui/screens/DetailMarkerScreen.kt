@@ -27,7 +27,8 @@ import com.example.mapsapp.viewmodels.OperacionesVM
 
 @Composable
 fun MarkerDetailScreen(markerID: Int, navigateBack: () -> Unit){
-    val myViewModel = viewModel<OperacionesVM>()
+
+   /* val myViewModel = viewModel<OperacionesVM>()
     myViewModel.getMarker(markerID)
     val markerTitle: String by myViewModel.markerTitle.observeAsState("")
     val markerDescrip: String by myViewModel.markerDescrip.observeAsState("")
@@ -40,5 +41,7 @@ fun MarkerDetailScreen(markerID: Int, navigateBack: () -> Unit){
             Text("Update")
         }
     }
+
+    */
 }
 
