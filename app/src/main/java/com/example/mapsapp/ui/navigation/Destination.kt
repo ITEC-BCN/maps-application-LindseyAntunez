@@ -14,7 +14,7 @@ sealed class Destination {
     data class CreateMarker (var lat: Double, var lon: Double)
 
     @Serializable
-    object DetailMarker : Destination()
+    data class DetailMarker (var id: Int)
 
     @Serializable
     object Permisos : Destination()

@@ -26,22 +26,29 @@ import com.example.mapsapp.data.MarkerD
 import com.example.mapsapp.viewmodels.OperacionesVM
 
 @Composable
-fun MarkerDetailScreen(markerID: Int, navigateBack: () -> Unit){
-
-   /* val myViewModel = viewModel<OperacionesVM>()
+fun MarkerDetailScreen(markerID: Int, navigateBack: () -> Unit) {
+    val myViewModel = viewModel<OperacionesVM>()
     myViewModel.getMarker(markerID)
     val markerTitle: String by myViewModel.markerTitle.observeAsState("")
-    val markerDescrip: String by myViewModel.markerDescrip.observeAsState("")
-    Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        TextField(value = studentName, onValueChange = { myViewModel.editStudentName(it) })
-        TextField(value = studentMark, onValueChange = { myViewModel.editStudentMark(it) })
+    val markerDescripcion: String by myViewModel.markerDescrip.observeAsState("")
+    val markerImagen: String by myViewModel.markerImage.observeAsState("foto")
+
+
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        TextField(value = markerTitle, onValueChange = { myViewModel.editTitle(it) })
+        TextField(value = markerDescripcion, onValueChange = { myViewModel.editDesc(it) })
         Button(onClick = {
-            myViewModel.updateStudent(studentId, studentName, studentMark)
-            navigateBack()}) {
+            myViewModel.updateStudent(markerID, markerTitle, markerDescripcion,markerImagen )
+            navigateBack()
+        }) {
             Text("Update")
         }
     }
 
-    */
+
 }
 

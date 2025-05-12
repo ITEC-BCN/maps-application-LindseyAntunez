@@ -41,7 +41,7 @@ class MySupabaseClient() {
         Log.d("Lindsey", "Salir del InsertMarker")
     }
 
-    suspend fun updateMarker(id:Int, title: String, descripcion: String, image: String) {
+    suspend fun updateMarker(id:Int, title: String, descripcion: String, image: String ) {
         client.from("marcador").update({
             set("title", title)
             set("descripcion", descripcion)

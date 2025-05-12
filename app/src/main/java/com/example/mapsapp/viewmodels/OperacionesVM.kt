@@ -23,10 +23,26 @@ class OperacionesVM : ViewModel() {
     val markerImage = _markerImage
     private var _selectedMarker: MarkerD? = null
 
-    private val _imageUri = MutableLiveData<Uri>(null)
+    private val _imageUri = MutableLiveData<Uri?>(null)
     val imageuri = _imageUri
     private var _bitmap = MutableLiveData<Bitmap>(null)
     val bitmap = _bitmap
+
+    private val _markerList = MutableLiveData<List<MarkerD>>()
+    val markerList = _markerList
+    private var _selectedMarkerD: MarkerD? = null
+
+
+
+    fun getAllStudents() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val databaseStudents = database.getAllMarkers()
+            withContext(Dispatchers.Main) {
+                _markerList.value = databaseStudents
+            }
+        }
+    }
+
 
     fun setImageUri(uri: Uri?){
         _imageUri.value = uri

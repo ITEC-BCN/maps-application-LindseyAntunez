@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.mapsapp.ui.screens.CreateMarkerScreen
 import com.example.mapsapp.ui.screens.MapScreen
+import com.example.mapsapp.ui.screens.MarkerDetailScreen
 import com.example.mapsapp.ui.screens.MarkerListScreen
 
 @Composable
@@ -20,7 +21,9 @@ fun NavigationWrapper(navigateNext: NavHostController, Modifer: Modifier) {
 
         }
         composable<Destination.List> {
-            MarkerListScreen()
+            MarkerListScreen({
+                id -> navigateNext.navigate(Destination.DetailMarker(id))
+            })
 
         }
         composable<Destination.CreateMarker> { backStackEntry ->
@@ -32,11 +35,13 @@ fun NavigationWrapper(navigateNext: NavHostController, Modifer: Modifier) {
             )
 
         }
-
-        composable<Destination.List> {
-            MarkerListScreen()
+        composable<Destination.DetailMarker> { backStackEntry ->
+            val update = backStackEntry.toRoute<Destination.DetailMarker>()
+            MarkerDetailScreen(navigateBack = { navigateNext.navigate(Destination.List) }, markerID = update.id)
 
         }
+
+
 
     }
 }

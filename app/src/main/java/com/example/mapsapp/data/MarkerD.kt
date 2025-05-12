@@ -7,6 +7,7 @@ data class MarkerD(
     var id: Int = 0,
     var title: String,
     var descripcion: String,
-    var image: String
+    var image: String,
+    var user_id: Int = 0,
 
 )
