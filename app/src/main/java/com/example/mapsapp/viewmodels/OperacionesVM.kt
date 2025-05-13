@@ -2,6 +2,7 @@ package com.example.mapsapp.viewmodels
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.mapsapp.MyApp
@@ -34,7 +35,7 @@ class OperacionesVM : ViewModel() {
 
 
 
-    fun getAllStudents() {
+    fun getAllMarkers() {
         CoroutineScope(Dispatchers.IO).launch {
             val databaseStudents = database.getAllMarkers()
             withContext(Dispatchers.Main) {
@@ -87,12 +88,15 @@ class OperacionesVM : ViewModel() {
         }
     }
 
-    fun insertNewMarker(title: String, descripcion: String, image: String) {
+    fun insertNewMarker(title: String, descripcion: String, image: String, latitud: Double, longitud: Double, bitmap: Bitmap) {
         val newMarker = MarkerD(
             title = title,
             descripcion = descripcion,
-            image = image
+            image = image,
+            latitud = latitud,
+            longitud = longitud
         )
+        Log.d("Lindsey", "$latitud $longitud")
         CoroutineScope(Dispatchers.IO).launch {
             database.insertMarker(newMarker)
             database.getAllMarkers()

@@ -8,6 +8,8 @@ data class MarkerD(
     var title: String,
     var descripcion: String,
     var image: String,
+    var latitud: Double,
+    var longitud: Double,
     var user_id: Int = 0,
 
 )

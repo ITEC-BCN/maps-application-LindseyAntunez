@@ -13,12 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,20 +40,27 @@ import com.example.mapsapp.viewmodels.OperacionesVM
 import java.io.File
 
 @Composable
-fun CreateMarkerScreen(navigateToDetail: (String) -> Unit, lat: Double, lon: Double) {
+fun CreateMarkerScreen(navigateToDetail: () -> Unit, lat: Double, lon: Double) {
     val context = LocalContext.current
-
-
-
-
-
     val myViewModel = viewModel<OperacionesVM>()
     val markerTitle: String by myViewModel.markerTitle.observeAsState("")
     val markerDesc: String by myViewModel.markerDescrip.observeAsState("")
     val markerImage: String by myViewModel.markerImage.observeAsState("hola")
     val bitmap by myViewModel.bitmap.observeAsState()
     val uri by myViewModel.imageuri.observeAsState()
-    val launcher =
+    var showDialog by remember { mutableStateOf(false) }
+
+    val pickImageLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                myViewModel.setImageUri(it)
+                val stream = context.contentResolver.openInputStream(it)
+                myViewModel.setBitmap(BitmapFactory.decodeStream(stream))
+            }
+        }
+
+
+    val launcherCamara =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
             if (success && uri != null) {
                 val stream = context.contentResolver.openInputStream(uri!!)
@@ -92,7 +104,7 @@ fun CreateMarkerScreen(navigateToDetail: (String) -> Unit, lat: Double, lon: Dou
             Button(onClick = {
                 val uri = createImageUri(context)
                 myViewModel.setImageUri(uri)
-                launcher.launch(uri!!)
+                launcherCamara.launch(uri!!)
             }) {
                 Text("Abrir Cámara")
             }
@@ -101,11 +113,31 @@ fun CreateMarkerScreen(navigateToDetail: (String) -> Unit, lat: Double, lon: Dou
                 Image(bitmap = it.asImageBitmap(), contentDescription = null,
                     modifier = Modifier.size(300.dp).clip(RoundedCornerShape(12.dp)),contentScale = ContentScale.Crop)
             }
-            Button(onClick = { myViewModel.insertNewMarker(markerTitle, markerDesc, markerImage) }                 ) {
+            Button(onClick = {
+                myViewModel.insertNewMarker(markerTitle, markerDesc,markerImage, lat,lon, bitmap)
+                navigateToDetail()}                 ) {
                 Text("Insert")
             }
         }
     }
+    if (showDialog) {
+        AlertDialog(onDismissRequest = { showDialog = false }, title = { Text("Selecciona una opción") },
+            text = { Text("¿Quieres tomar una foto o elegir una desde la galería?") },
+            confirmButton = {TextButton(onClick = {
+                showDialog = false
+                val uri = createImageUri(context)
+                myViewModel.setImageUri(uri)
+                launcherCamara.launch(uri!!)
+            }) { Text("Tomar Foto") }
+            },
+            dismissButton = {TextButton(onClick = {
+                showDialog = false
+                pickImageLauncher.launch("image/*")
+            }) { Text("Elegir de Galería") }
+            }
+        )
+    }
+
 
 }
 

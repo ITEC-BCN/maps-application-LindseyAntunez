@@ -1,13 +1,12 @@
 package com.example.mapsapp.ui.screens
 
-import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mapsapp.viewmodels.OperacionesVM
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -17,21 +16,33 @@ import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun MapScreen(modifier: Modifier = Modifier, navigateToCreate: (Double, Double) -> Unit) {
+    var myViewModel = viewModel<OperacionesVM>()
+    var marcadorList = myViewModel.markerList.observeAsState(emptyList())
+    myViewModel.getAllMarkers()
     Column(modifier.fillMaxSize()) {
         val itb = LatLng(41.4534225, 2.1837151)
         val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(itb, 17f)
         }
         GoogleMap(
-            modifier.fillMaxSize(), cameraPositionState = cameraPositionState,
-            onMapClick = {
-                Log.d("MAP CLICKED", it.toString())
-            }, onMapLongClick = {
-                navigateToCreate(it.latitude, it.longitude)
-            }){
+            modifier = modifier.fillMaxSize(),
+            cameraPositionState = cameraPositionState,
+            onMapLongClick = { navigateToCreate(it.latitude, it.longitude)
+            }
+        ) {
+            marcadorList.value.forEach { marcador ->
+                Marker(
+                    state = MarkerState(position = LatLng(marcador.latitud, marcador.longitud)),
+                    title = marcador.title,
+                    snippet = marcador.descripcion
+                )
+            }
+
             Marker(
-                state = MarkerState(position = itb), title = "ITB",
-                snippet = "MarkerD at ITB")
+                state = MarkerState(position = itb),
+                title = "ITB",
+                snippet = "Marcador fijo"
+            )
         }
 
     }

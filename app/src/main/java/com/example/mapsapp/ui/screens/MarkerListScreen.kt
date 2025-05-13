@@ -35,7 +35,7 @@ import com.example.mapsapp.viewmodels.OperacionesVM
 fun MarkerListScreen(navigateToDetail: (Int) -> Unit){
     val myViewModel = viewModel<OperacionesVM>()
     val markerList by myViewModel.markerList.observeAsState(emptyList<MarkerD>())
-    myViewModel.getAllStudents()
+    myViewModel.getAllMarkers()
     LazyColumn(Modifier.fillMaxWidth().padding(top= 150.dp)) {
         items(markerList) { marker ->
             val dissmissState = rememberSwipeToDismissBoxState(
