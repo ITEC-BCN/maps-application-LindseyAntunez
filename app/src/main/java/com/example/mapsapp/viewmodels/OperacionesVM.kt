@@ -42,7 +42,7 @@ class OperacionesVM : ViewModel() {
             val databaseStudents = database.getAllMarkers()
             withContext(Dispatchers.Main) {
                 _markerList.value = databaseStudents
-                _showLoading.value = false
+                _showLoading.value = true
             }
         }
     }
