@@ -3,9 +3,11 @@ package com.example.mapsapp.ui.screens
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,6 +41,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mapsapp.viewmodels.OperacionesVM
 import java.io.File
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CreateMarkerScreen(navigateToDetail: () -> Unit, lat: Double, lon: Double) {
     val context = LocalContext.current
@@ -114,7 +117,7 @@ fun CreateMarkerScreen(navigateToDetail: () -> Unit, lat: Double, lon: Double) {
                     modifier = Modifier.size(300.dp).clip(RoundedCornerShape(12.dp)),contentScale = ContentScale.Crop)
             }
             Button(onClick = {
-                myViewModel.insertNewMarker(markerTitle, markerDesc,markerImage, lat,lon, bitmap)
+                myViewModel.insertNewMarker(markerTitle, markerDesc, lat,lon, bitmap)
                 navigateToDetail()}                 ) {
                 Text("Insert")
             }

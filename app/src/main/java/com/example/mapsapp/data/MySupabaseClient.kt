@@ -1,22 +1,47 @@
 package com.example.mapsapp.data
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import com.example.mapsapp.BuildConfig
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.storage.FileUploadResponse
+import io.github.jan.supabase.storage.Storage
+import io.github.jan.supabase.storage.storage
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-class MySupabaseClient() {
+
+class MySupabaseClient {
+
     lateinit var client: SupabaseClient
+    lateinit var storage: Storage
+    private val supabaseUrl = BuildConfig.SUPABASE_URL
+    private val supabaseKey = BuildConfig.SUPABASE_KEY
 
-    constructor(supabaseUrl: String, supabaseKey: String) : this() {
-        client = createSupabaseClient(
-            supabaseUrl = supabaseUrl,
-            supabaseKey = supabaseKey
-        ) {
+    constructor() {
+        client = createSupabaseClient(supabaseUrl = supabaseUrl, supabaseKey = supabaseKey) {
             install(Postgrest)
+            install(Storage)
         }
+        storage = client.storage
     }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    suspend fun uploadImage(imageFile: ByteArray): String {
+        val fechaHoraActual = LocalDateTime.now()
+        val formato = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")
+        val imageName = storage.from("images")
+            .upload(path = "image_${fechaHoraActual.format(formato)}.png", data = imageFile)
+        return buildImageUrl(imageFileName = imageName.path)
+    }
+
+    fun buildImageUrl(imageFileName: String) =
+        "${this.supabaseUrl}/storage/v1/object/public/images/${imageFileName}"
+
 
     suspend fun getAllMarkers(): List<MarkerD> {
         return client.from("marcador").select().decodeList<MarkerD>()
@@ -30,28 +55,65 @@ class MySupabaseClient() {
         }.decodeSingle<MarkerD>()
     }
 
-    suspend fun insertMarker(markerD: MarkerD) {
+
+    suspend fun insertMarker(
+        title: String,
+        descripcion: String,
+        latitud: Double,
+        longitud: Double,
+        imageName: String
+    ) {
         Log.d("Lindsey", "Entrar del InsertMarker")
-        Log.d("Lindsey","httpURL: ${client.supabaseHttpUrl}")
+        Log.d("Lindsey", "httpURL: ${client.supabaseHttpUrl}")
         Log.d("Lindsey", "supabaseURL: ${client.supabaseUrl}")
         Log.d("Lindsey", "key: ${client.supabaseKey}")
-
-        client.from("marcador").insert(markerD)
+        val newMarker = MarkerD(
+            title = title,
+            descripcion = descripcion,
+            image = imageName,
+            latitud = latitud,
+            longitud = longitud
+        )
+        client.from("marcador").insert(newMarker)
 
         Log.d("Lindsey", "Salir del InsertMarker")
     }
 
-    suspend fun updateMarker(id:Int, title: String, descripcion: String, image: String ) {
+
+
+    suspend fun updateMarker(
+        id: Int,
+        title: String,
+        descripcion: String,
+        imageName: String,
+        imageFile: ByteArray?
+    ) {
+        var newImageName: FileUploadResponse? = null
+        if (imageFile != null) {
+            newImageName = storage.from("images").update(path = imageName, data = imageFile)
+        }
+
+
+
         client.from("marcador").update({
             set("title", title)
             set("descripcion", descripcion)
-            set("image", image)
+            if (newImageName != null) {
+                set("image", buildImageUrl(imageFileName = newImageName!!.path))
+            }
         }) { filter { eq("id", id) } }
     }
 
     suspend fun deleteMarker(id: Int) {
         client.from("marcador").delete { filter { eq("id", id) } }
     }
+
+    suspend fun deleteImage(imageName: String){
+        val imgName = imageName.removePrefix("https://aobflzinjcljzqpxpcxs.supabase.co/storage/v1/object/public/images/")
+        client.storage.from("images").delete(imgName)
+    }
+
+
 
 
 }

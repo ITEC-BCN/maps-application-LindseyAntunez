@@ -2,7 +2,8 @@ package com.example.mapsapp.viewmodels
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.mapsapp.MyApp
@@ -11,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
 class OperacionesVM : ViewModel() {
     val database = MyApp.database
@@ -23,15 +25,15 @@ class OperacionesVM : ViewModel() {
     private val _markerImage = MutableLiveData<String>()
     val markerImage = _markerImage
     private var _selectedMarker: MarkerD? = null
-
     private val _imageUri = MutableLiveData<Uri?>(null)
     val imageuri = _imageUri
     private var _bitmap = MutableLiveData<Bitmap>(null)
     val bitmap = _bitmap
-
     private val _markerList = MutableLiveData<List<MarkerD>>()
     val markerList = _markerList
     private var _selectedMarkerD: MarkerD? = null
+    private val _showLoading = MutableLiveData<Boolean>(true)
+    val showLoading = _showLoading
 
 
 
@@ -40,6 +42,7 @@ class OperacionesVM : ViewModel() {
             val databaseStudents = database.getAllMarkers()
             withContext(Dispatchers.Main) {
                 _markerList.value = databaseStudents
+                _showLoading.value = false
             }
         }
     }
@@ -62,14 +65,32 @@ class OperacionesVM : ViewModel() {
         _markerDescrip.value = value
     }
 
-    fun updateStudent(id: Int, title: String, descripcion: String, image: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            database.updateMarker(
-                id = id,
-                title = title,
-                descripcion = descripcion,
-                image = image
-            )
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun updateMarker(id: Int, title: String, descripcion: String, image: Bitmap?, _markerImageName: String?) {
+        if (image != null) {
+            val stream = ByteArrayOutputStream()
+            image?.compress(Bitmap.CompressFormat.PNG, 0, stream)
+            CoroutineScope(Dispatchers.IO).launch {
+                val imageName = database.uploadImage(stream.toByteArray())
+                database.updateMarker(
+                    id = id,
+                    title = title,
+                    descripcion = descripcion,
+                    imageName.toString(), stream.toByteArray()
+                )
+                database.deleteImage(_markerImageName!!)
+            }
+        }
+        else{
+            CoroutineScope(Dispatchers.IO).launch {
+                database.updateMarker(
+                    id = id,
+                    title = title,
+                    descripcion = descripcion,
+                    _markerImageName.toString(),null
+                )
+            }
+
         }
     }
 
@@ -83,31 +104,41 @@ class OperacionesVM : ViewModel() {
                     _markerDescrip.value = marker.descripcion
                     _markerImage.value = marker.image
 
+
                 }
             }
         }
     }
 
-    fun insertNewMarker(title: String, descripcion: String, image: String, latitud: Double, longitud: Double, bitmap: Bitmap) {
-        val newMarker = MarkerD(
-            title = title,
-            descripcion = descripcion,
-            image = image,
-            latitud = latitud,
-            longitud = longitud
-        )
-        Log.d("Lindsey", "$latitud $longitud")
-        CoroutineScope(Dispatchers.IO).launch {
-            database.insertMarker(newMarker)
-            database.getAllMarkers()
-        }
-    }
 
-    fun deleteMarker(id: Int) {
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun insertNewMarker(title: String, descripcion: String, latitud: Double, longitud: Double, bitmap: Bitmap?) {
+
+        val stream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.PNG, 0, stream)
         CoroutineScope(Dispatchers.IO).launch {
+            val imageName = database.uploadImage(stream.toByteArray())
+            database.insertMarker(title, descripcion, latitud, longitud, imageName)
+            database.getAllMarkers()
+
+
+        }
+
+            }
+
+    fun deleteMarker(id: Int, image: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            database.deleteImage(image)
             database.deleteMarker(id)
             database.getAllMarkers()
         }
     }
+
+
+
+
+
+
 
 }
