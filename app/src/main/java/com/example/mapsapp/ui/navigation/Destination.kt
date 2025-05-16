@@ -22,6 +22,17 @@ sealed class Destination {
     @Serializable
     object Drawer : Destination()
 
+    @Serializable
+    object Home : Destination()
+
+    @Serializable
+    object Register : Destination()
+
+    @Serializable
+    object LogIn : Destination()
+
+
+
 
 }
 

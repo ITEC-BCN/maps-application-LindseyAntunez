@@ -1,10 +1,15 @@
 package com.example.mapsapp.data
 
 import android.os.Build
+import android.provider.ContactsContract.CommonDataKinds.Email
 import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.mapsapp.BuildConfig
+import com.example.mapsapp.utils.AuthState
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
@@ -15,7 +20,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 
-class MySupabaseClient {
+class SupabaseManager {
 
     lateinit var client: SupabaseClient
     lateinit var storage: Storage
@@ -26,9 +31,53 @@ class MySupabaseClient {
         client = createSupabaseClient(supabaseUrl = supabaseUrl, supabaseKey = supabaseKey) {
             install(Postgrest)
             install(Storage)
+            install(Auth) { autoLoadFromStorage = true }
         }
         storage = client.storage
     }
+
+    suspend fun signUpWithEmail(emailValue: String, passwordValue: String): AuthState {
+        try {
+            client.auth.signUpWith(
+                provider = io.github.jan.supabase.auth.providers.builtin.Email
+            ) {
+                email = emailValue
+                password = passwordValue
+            }
+            return AuthState.Authenticated
+        } catch (e: Exception) {
+            return AuthState.Error(e.localizedMessage)
+        }
+    }
+
+    suspend fun signInWithEmail(emailValue: String, passwordValue: String): AuthState {
+        try {
+            client.auth.signInWith(io.github.jan.supabase.auth.providers.builtin.Email) {
+                email = emailValue
+                password = passwordValue
+            }
+            return AuthState.Authenticated
+        } catch (e: Exception) {
+            return AuthState.Error(e.localizedMessage)
+        }
+    }
+
+
+    fun retrieveCurrentSession(): UserSession? {
+        val session = client.auth.currentSessionOrNull()
+        return session
+    }
+
+    fun refreshSession(): AuthState {
+        try {
+            client.auth.currentSessionOrNull()
+            return AuthState.Authenticated
+        } catch (e: Exception) {
+            return AuthState.Error(e.localizedMessage)
+        }
+    }
+
+
 
     @RequiresApi(Build.VERSION_CODES.O)
     suspend fun uploadImage(imageFile: ByteArray): String {
@@ -80,7 +129,6 @@ class MySupabaseClient {
     }
 
 
-
     suspend fun updateMarker(
         id: Int,
         title: String,
@@ -108,12 +156,11 @@ class MySupabaseClient {
         client.from("marcador").delete { filter { eq("id", id) } }
     }
 
-    suspend fun deleteImage(imageName: String){
-        val imgName = imageName.removePrefix("https://aobflzinjcljzqpxpcxs.supabase.co/storage/v1/object/public/images/")
+    suspend fun deleteImage(imageName: String) {
+        val imgName =
+            imageName.removePrefix("https://aobflzinjcljzqpxpcxs.supabase.co/storage/v1/object/public/images/")
         client.storage.from("images").delete(imgName)
     }
-
-
 
 
 }
