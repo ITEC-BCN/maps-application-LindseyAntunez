@@ -96,6 +96,25 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:auth-kt:3.1.4")
     implementation(platform("io.github.jan-tennert.supabase:bom:3.1.4"))
     implementation("io.ktor:ktor-client-android:3.1.2")
+    implementation(libs.androidx.ui.v150)
+    implementation(libs.androidx.material.v150)
+    implementation(libs.androidx.ui.tooling.preview.v150)
+    implementation(libs.androidx.activity.compose.v1101)
+
+    // Google Maps
+    implementation(libs.play.services.maps.v1800)
+
+
+
+
+
+
+    implementation(libs.ui)
+    implementation(libs.androidx.material)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.activity.compose.v161)
+
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
