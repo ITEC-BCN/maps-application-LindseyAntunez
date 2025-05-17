@@ -34,65 +34,66 @@ import com.example.mapsapp.viewmodels.AuthViewModelFactory
 @Composable
 fun RegisterScreen(navigateToHome: () -> Unit) {
     val context = LocalContext.current
-    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(SharedPreferencesHelper(context)))
+    val viewModel: AuthViewModel =
+        viewModel(factory = AuthViewModelFactory(SharedPreferencesHelper(context)))
     val authState by viewModel.authState.observeAsState()
     val showError by viewModel.showError.observeAsState(false)
     val email by viewModel.email.observeAsState("")
     val password by viewModel.password.observeAsState("")
 
-    if (authState == AuthState.Authenticated) {
-        navigateToHome()
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Register",
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { viewModel.editEmail(it) },
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { viewModel.editPassword(it) },
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        )
+
+        Button(
+            onClick = {
+                viewModel.signUp()
+                navigateToHome()
+            },
+            modifier = Modifier.padding(top = 16.dp)
         ) {
+            Text("Sign Up")
+        }
+
+        if (showError) {
+            val errorMessage = (authState as AuthState.Error).message
             Text(
-                text = "Register",
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 16.dp)
+                text = if (errorMessage!!.contains("weak_password")) {
+                    "Password should be at least 6 characters"
+                } else {
+                    "An error has occurred"
+                },
+                color = Color.Red,
+                modifier = Modifier.padding(top = 8.dp)
             )
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { viewModel.editEmail(it) },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { viewModel.editPassword(it) },
-                label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-            )
-
-            Button(
-                onClick = { viewModel.signUp() },
-                modifier = Modifier.padding(top = 16.dp)
-            ) {
-                Text("Sign Up")
-            }
-
-            if (showError) {
-                val errorMessage = (authState as AuthState.Error).message
-                Text(
-                    text = if (errorMessage!!.contains("weak_password")) {
-                        "Password should be at least 6 characters"
-                    } else {
-                        "An error has occurred"
-                    },
-                    color = Color.Red,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                viewModel.errorMessageShowed()
-            }
+            viewModel.errorMessageShowed()
         }
     }
+
 }

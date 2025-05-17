@@ -6,7 +6,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mapsapp.ui.navigation.Destination.Drawer
+import com.example.mapsapp.ui.navigation.Destination.Home
+import com.example.mapsapp.ui.navigation.Destination.LogIn
+import com.example.mapsapp.ui.navigation.Destination.Permisos
+import com.example.mapsapp.ui.navigation.Destination.Register
 import com.example.mapsapp.ui.screens.HomeScreen
+import com.example.mapsapp.ui.screens.LogInScreen
 import com.example.mapsapp.ui.screens.MyDrawerMenu
 import com.example.mapsapp.ui.screens.PermisosScreen
 import com.example.mapsapp.ui.screens.RegisterScreen
@@ -18,24 +23,38 @@ fun ModalNavWrapper() {
 
         composable<Destination.Home> {
             HomeScreen(
-                navigateToRegister = { navController.navigate(Destination.Register) },
-                navigateToLogin = { navController.navigate(Destination.LogIn) }
+                navigateToRegister = { navController.navigate(Register) },
+                navigateToLogIn = { navController.navigate(Destination.LogIn) }
             )
         }
 
-        composable<Destination.Permisos> {
+        composable<LogIn> {
+            LogInScreen({ navController.navigate(Permisos) })
+
+        }
+
+        composable<Permisos> {
             PermisosScreen(navController.navigate(Drawer))
 
         }
         composable<Drawer> {
-            MyDrawerMenu()
+            MyDrawerMenu {
+                navController.navigate(Destination.Home) {
+                    popUpTo<Home> { inclusive = true }
+                }
+
+
+            }
 
         }
+        composable<Register> {
+            RegisterScreen {
+                navController.navigate(Destination.Home) {
+                    popUpTo<Home> { inclusive = true }
+                }
+            }
 
-        composable<Destination.Register> {
-            RegisterScreen({navController.navigate(Destination.Permisos)})
+
         }
-
-
     }
 }

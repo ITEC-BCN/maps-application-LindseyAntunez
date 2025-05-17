@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun HomeScreen(navigateToRegister: () -> Unit, navigateToLogin: () -> Unit) {
+fun HomeScreen(navigateToRegister: () -> Unit, navigateToLogIn: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,7 +40,7 @@ fun HomeScreen(navigateToRegister: () -> Unit, navigateToLogin: () -> Unit) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { navigateToLogin() },
+            onClick = { navigateToLogIn() },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Login")
