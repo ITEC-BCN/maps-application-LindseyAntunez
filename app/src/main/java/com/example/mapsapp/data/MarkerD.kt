@@ -10,6 +10,6 @@ data class MarkerD(
     var image: String,
     var latitud: Double,
     var longitud: Double,
-    var user_id: Int = 0,
+    var user_id: String = "",
 
 )
