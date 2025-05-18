@@ -35,28 +35,24 @@ class OperacionesVM : ViewModel() {
     private val _showLoading = MutableLiveData<Boolean>(true)
     val showLoading = _showLoading
 
-
-
     fun getAllMarkers() {
         CoroutineScope(Dispatchers.IO).launch {
             val databaseStudents = database.getAllMarkers()
             withContext(Dispatchers.Main) {
                 _markerList.value = databaseStudents
-                _showLoading.value = true
+                _showLoading.value = false  // Se desactiva la carga al finalizar
             }
         }
     }
 
-
-    fun setImageUri(uri: Uri?){
+    fun setImageUri(uri: Uri?) {
         _imageUri.value = uri
-
     }
 
-    fun setBitmap(bit: Bitmap){
+    fun setBitmap(bit: Bitmap) {
         _bitmap.value = bit
-
     }
+
     fun editTitle(value: String) {
         _markerTitle.value = value
     }
@@ -69,7 +65,7 @@ class OperacionesVM : ViewModel() {
     fun updateMarker(id: Int, title: String, descripcion: String, image: Bitmap?, _markerImageName: String?) {
         if (image != null) {
             val stream = ByteArrayOutputStream()
-            image?.compress(Bitmap.CompressFormat.PNG, 0, stream)
+            image.compress(Bitmap.CompressFormat.PNG, 0, stream)
             CoroutineScope(Dispatchers.IO).launch {
                 val imageName = database.uploadImage(stream.toByteArray())
                 database.updateMarker(
@@ -80,17 +76,15 @@ class OperacionesVM : ViewModel() {
                 )
                 database.deleteImage(_markerImageName!!)
             }
-        }
-        else{
+        } else {
             CoroutineScope(Dispatchers.IO).launch {
                 database.updateMarker(
                     id = id,
                     title = title,
                     descripcion = descripcion,
-                    _markerImageName.toString(),null
+                    _markerImageName.toString(), null
                 )
             }
-
         }
     }
 
@@ -103,42 +97,37 @@ class OperacionesVM : ViewModel() {
                     _markerTitle.value = marker.title
                     _markerDescrip.value = marker.descripcion
                     _markerImage.value = marker.image
-
-
                 }
             }
         }
     }
 
-
-
     @RequiresApi(Build.VERSION_CODES.O)
     fun insertNewMarker(title: String, descripcion: String, latitud: Double, longitud: Double, bitmap: Bitmap?) {
-
+        // Activamos la carga
+        _showLoading.postValue(true)
         val stream = ByteArrayOutputStream()
-        bitmap?.compress(Bitmap.CompressFormat.PNG, 0, stream)
+        bitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream)
         CoroutineScope(Dispatchers.IO).launch {
             val imageName = database.uploadImage(stream.toByteArray())
             database.insertMarker(title, descripcion, latitud, longitud, imageName)
-            database.getAllMarkers()
-
-
-        }
-
+            // Obtenemos la lista actualizada de marcadores
+            val updatedMarkers = database.getAllMarkers()
+            withContext(Dispatchers.Main) {
+                _markerList.value = updatedMarkers  // Se actualiza la lista, lo que refrescará el mapa
+                _showLoading.value = false           // Desactivamos la carga
             }
+        }
+    }
 
     fun deleteMarker(id: Int, image: String) {
         CoroutineScope(Dispatchers.IO).launch {
             database.deleteImage(image)
             database.deleteMarker(id)
-            database.getAllMarkers()
+            val updatedMarkers = database.getAllMarkers()
+            withContext(Dispatchers.Main) {
+                _markerList.value = updatedMarkers
+            }
         }
     }
-
-
-
-
-
-
-
 }
